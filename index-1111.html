@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VulnTracer — Khaled | Cybersecurity Practitioner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F7F7F4;
+    --ink: #14181F;
+    --muted: #5B6472;
+    --accent: #0E7C7B;
+    --accent-dim: #0E7C7B1a;
+    --line: #E1E4E1;
+    --tag-bg: #EEF3F2;
+    --paper: #FFFFFF;
+  }
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a{ color: var(--accent); text-decoration: none; }
+  a:hover{ text-decoration: underline; }
+  a:focus-visible, button:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .wrap{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---- Report header / eyebrow ---- */
+  .report-bar{
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0;
+  }
+  .report-bar .wrap{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .report-meta{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  .report-meta .status{
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .report-meta .status::before{
+    content:"● ";
+  }
+
+  /* ---- Hero ---- */
+  header.hero{
+    padding: 72px 0 48px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 0 0 18px;
+  }
+  h1{
+    font-family:'Newsreader', serif;
+    font-weight: 500;
+    font-size: clamp(36px, 6vw, 54px);
+    line-height: 1.08;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  h1 em{
+    font-style: italic;
+    color: var(--accent);
+  }
+  .lede{
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 54ch;
+    margin: 0 0 28px;
+  }
+  .hero-links{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .hero-links a{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    background: var(--paper);
+    padding: 9px 16px;
+    border-radius: 3px;
+    text-decoration: none;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .hero-links a:hover{
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .hero-links a.primary{
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .hero-links a.primary:hover{
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--paper);
+  }
+
+  .stat-row{
+    display:flex;
+    gap: 32px;
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .stat-num{
+    font-family:'Newsreader', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .stat-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  /* ---- Section shell ---- */
+  section{
+    padding: 56px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  section:last-of-type{ border-bottom: none; }
+  .section-head{
+    display:flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .section-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+  }
+  h2{
+    font-family:'Newsreader', serif;
+    font-weight: 500;
+    font-size: 26px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  /* ---- About ---- */
+  .about-body p{
+    color: var(--ink);
+    max-width: 62ch;
+    margin: 0 0 16px;
+    font-size: 16px;
+  }
+  .about-body p:last-child{ margin-bottom: 0; }
+
+  /* ---- Skills / scope table ---- */
+  .scope{
+    display: grid;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .scope-row{
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    border-bottom: 1px solid var(--line);
+  }
+  .scope-row:last-child{ border-bottom: none; }
+  .scope-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+    background: var(--paper);
+    padding: 18px 20px;
+    border-right: 1px solid var(--line);
+    display:flex;
+    align-items:center;
+  }
+  .scope-tags{
+    padding: 14px 20px;
+    display:flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-content: center;
+    background: var(--paper);
+  }
+  .tag{
+    font-size: 13.5px;
+    background: var(--tag-bg);
+    color: var(--ink);
+    padding: 6px 12px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 560px){
+    .scope-row{ grid-template-columns: 1fr; }
+    .scope-label{ border-right: none; border-bottom: 1px solid var(--line); }
+  }
+
+  /* ---- Links / findings list (merged from link_index style) ---- */
+  .status-row{
+    display:flex;
+    gap: 18px;
+    margin-bottom: 24px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .status-row .dot{
+    display:inline-block;
+    width:6px; height:6px;
+    border-radius:50%;
+    background: var(--accent);
+    margin-right:6px;
+  }
+
+  .findings{
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .finding{
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--paper);
+    transition: background .15s ease, transform .15s ease;
+  }
+  .finding:last-child{ border-bottom: none; }
+  .finding:hover{
+    background: var(--tag-bg);
+    text-decoration: none;
+    transform: translateX(2px);
+  }
+  .finding .id{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    min-width: 60px;
+  }
+  .finding-body{ flex: 1; }
+  .finding-title{
+    font-weight: 600;
+    font-size: 15.5px;
+    color: var(--ink);
+  }
+  .finding-sub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .finding .arrow{
+    font-family:'IBM Plex Mono', monospace;
+    color: var(--muted);
+    font-size: 16px;
+  }
+  .finding:hover .arrow{ color: var(--accent); }
+
+  @media (max-width: 400px){
+    .finding .id{ min-width: 46px; font-size: 10px; }
+  }
+
+  footer{
+    padding: 40px 0 48px;
+    border-top: 1px solid var(--line);
+  }
+  .footer-top{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .footer-name{
+    font-family:'Newsreader', serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink);
+    display:block;
+  }
+  .footer-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    display:block;
+    margin-top: 4px;
+  }
+  .footer-contact{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--accent);
+    align-self: center;
+  }
+  .footer-bottom{
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+  <div class="report-bar">
+    <div class="wrap">
+      <span class="report-meta">VulnTracer / engagement-profile / ref: VT-2026</span>
+      <span class="report-meta"><span class="status">AVAILABLE FOR ENGAGEMENTS</span></span>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Web Application &amp; API Penetration Testing</p>
+      <h1>Khaled finds the bugs<br>others <em>ship past</em>.</h1>
+      <p class="lede">Independent cybersecurity practitioner based in Dhaka, Bangladesh, operating as <strong>VulnTracer</strong> — focused on web application security, API penetration testing, and building the tools to do both properly.</p>
+      <div class="hero-links">
+        <a href="#" class="primary" id="link-linkedin">LinkedIn</a>
+        <a href="#" id="link-youtube">YouTube</a>
+        <!--<a href="#" id="link-fiverr">Fiverr</a>-->
+        <a href="#" id="link-github">GitHub</a>
+      </div>
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-num">3+</div>
+          <div class="stat-label">Years Hands-On</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">Self-Taught</div>
+          <div class="stat-label">Practical, Lab-Driven</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">BN / EN</div>
+          <div class="stat-label">Writeups &amp; Teaching</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="about">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="section-num">01</span>
+        <h2>About</h2>
+      </div>
+      <div class="about-body">
+        <p>I came to security from dust, I was a noob — which means everything I know was learned by taking things apart, breaking them, and writing down what happened. Three years in, that's still how I work.</p>
+        <p>My focus is web application and API security: cross-site scripting, file upload flaws, SQL injection, IDOR, broken authentication, SSRF, and the smaller logic errors that automated scanners miss. I write Python tooling to speed up that process, and I test everything on real, reproducible setups before I trust it.</p>
+        <p>Alongside client work on Fiverr, I run a Bengali-language YouTube channel teaching Kali Linux and cybersecurity fundamentals — because most of what I needed when I started wasn't available in my own language.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="section-num">02</span>
+        <h2>Scope of Work</h2>
+      </div>
+      <div class="scope">
+        <div class="scope-row">
+          <div class="scope-label">Web App</div>
+          <div class="scope-tags">
+            <span class="tag">XSS (reflected / DOM / stored)</span>
+            <span class="tag">SQL Injection</span>
+            <span class="tag">File Upload Vulnerabilities</span>
+            <span class="tag">Filter &amp; WAF Evasion</span>
+          </div>
+        </div>
+        <div class="scope-row">
+          <div class="scope-label">API Security</div>
+          <div class="scope-tags">
+            <span class="tag">IDOR</span>
+            <span class="tag">Broken Authentication</span>
+            <span class="tag">Mass Assignment</span>
+            <span class="tag">SSRF</span>
+          </div>
+        </div>
+        <div class="scope-row">
+          <div class="scope-label">Tooling</div>
+          <div class="scope-tags">
+            <span class="tag">Python Automation</span>
+            <span class="tag">Burp Suite Pro</span>
+            <span class="tag">Kali Linux</span>
+            <span class="tag">Custom Scripting</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="links">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="section-num">03</span>
+        <h2>Find the work</h2>
+      </div>
+
+      <div class="status-row">
+        <span><span class="dot"></span>STATUS: ACTIVE</span>
+        <span>REGION: DHAKA, BD</span>
+        <span>SCOPE: 4 CHANNELS</span>
+      </div>
+
+      <div class="findings">
+
+        <a class="finding" href="#" id="card-github">
+          <div class="id">[GIT]</div>
+          <div class="finding-body">
+            <div class="finding-title">GitHub</div>
+            <div class="finding-sub">code &amp; tools</div>
+          </div>
+          <div class="arrow">→</div>
+        </a>
+
+        <a class="finding" href="#" id="card-linkedin">
+          <div class="id">[LNK]</div>
+          <div class="finding-body">
+            <div class="finding-title">LinkedIn</div>
+            <div class="finding-sub">posts &amp; career updates</div>
+          </div>
+          <div class="arrow">→</div>
+        </a>
+
+        <a class="finding" href="#" id="card-youtube">
+          <div class="id">[YT]</div>
+          <div class="finding-body">
+            <div class="finding-title">YouTube</div>
+            <div class="finding-sub">Bengali cybersecurity tutorials</div>
+          </div>
+          <div class="arrow">→</div>
+        </a>
+
+        <a class="finding" href="#" id="card-fiverr">
+          <div class="id">[FVR]</div>
+          <div class="finding-body">
+            <div class="finding-title">Fiverr</div>
+            <div class="finding-sub">hire for a project</div>
+          </div>
+          <div class="arrow">→</div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="footer-name">VulnTracer</span>
+          <span class="footer-tag">Web App &amp; API Security — Dhaka, Bangladesh</span>
+        </div>
+        <a href="mailto:your-email@example.com" class="footer-contact">your-email@example.com</a>
+      </div>
+      <div class="footer-bottom">
+        <span>Report closed — findings valid as of last update</span>
+        <span>© 2026 VulnTracer. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
